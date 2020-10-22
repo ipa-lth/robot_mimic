@@ -58,7 +58,7 @@ class EnvRobot:
         self.links = self.set_joints(self.links, self.init_angles)
 
     def turn(self, angles):
-        #print angles
+        #print(angles)
         self.links = self.add_to_joints(self.links, angles)
 
     def getRobotState(self, links):
@@ -87,7 +87,7 @@ class EnvRobot:
 
     def getRewardScaling(self, start, stop, step):
         start_angles = [l['angle'] for l in self.links]
-        print start_angles
+        print(start_angles)
 
         s = [np.arange(start*math.pi/180, stop*math.pi/180, step*math.pi/180) for _ in self.links]
         rewards = []
@@ -116,7 +116,7 @@ class EnvRobot:
                   (px+length, py-w_2),
                   (px+length, py+w_2),
                   (px, py+w_2)]
-        #print shape
+        #print(shape)
         rot_shape = [(c*(x-px) - s*(y-py) + px,
                       s*(x-px) + c*(y-py) + py) for (x,y) in shape]
 
@@ -193,4 +193,4 @@ if __name__ == "__main__":
     env.plot(goal=True)
 
     m = env.getState()
-    print env.getReward()
+    print(env.getReward())
