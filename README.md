@@ -8,3 +8,6 @@ One arm (colored) is supposed to match as much as possible with the second arm (
 The rate of the matching (reward) is calculated by the averaged sum of overlapping pixels.
 
 <img src="out.gif" height="300"> <img src="rewards.png" height="300">
+
+## Example Training session
+<img src="training_session.png" height="300">
