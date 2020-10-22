@@ -84,19 +84,19 @@ class EnvRobot:
             return (float)(sum_px - self.mini)/self.maxi
         else:
             return sum_px
-    
+
     def getRewardScaling(self, start, stop, step):
         start_angles = [l['angle'] for l in self.links]
         print start_angles
-        
+
         s = [np.arange(start*math.pi/180, stop*math.pi/180, step*math.pi/180) for _ in self.links]
         rewards = []
         for j in itertools.product(*s):
             self.turn(j)
             rewards.append(self.getReward())
-        
+
         self.turn(start_angles)
-        
+
         self.mini = min(rewards)
         self.maxi = max(rewards)
         return (self.mini, self.maxi)
@@ -178,19 +178,19 @@ class EnvRobot:
         return updated_links
 
 if __name__ == "__main__":
-	pos = (0, 200)
-	env = EnvRobot(pos,
-		       [(100, 20), (100, 15), (100, 10), (100, 5)], # arm length and width
-		       [0, 0, 0, 0]) # initial angles
+    pos = (0, 200)
+    env = EnvRobot(pos,
+           [(100, 20), (100, 15), (100, 10), (100, 5)], # arm length and width
+           [0, 0, 0, 0]) # initial angles
 
-	env.setObservationSpace(400, 400)
+    env.setObservationSpace(400, 400)
 
-	env.setGoalRobot(pos,
-		         [(100, 20), (100, 15), (100, 10), (100, 5)], # arm length and width
-		         [0, -45*math.pi/180, -90*math.pi/180, -90*math.pi/180]) # initial angles
+    env.setGoalRobot(pos,
+             [(100, 20), (100, 15), (100, 10), (100, 5)], # arm length and width
+             [0, -45*math.pi/180, -90*math.pi/180, -90*math.pi/180]) # initial angles
 
-	env.turn([0, 45*math.pi/180, 90*math.pi/180, 90*math.pi/180])
-	env.plot(goal=True)
+    env.turn([0, 45*math.pi/180, 90*math.pi/180, 90*math.pi/180])
+    env.plot(goal=True)
 
-	m = env.getState()
-	print env.getReward()
+    m = env.getState()
+    print env.getReward()
