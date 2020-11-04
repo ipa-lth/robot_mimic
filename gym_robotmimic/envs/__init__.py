@@ -1,0 +1,1 @@
+from gym_robotmimic.envs.robotmimic_env import RobotMimicEnv
