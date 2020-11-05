@@ -50,7 +50,7 @@ class EnvRobot:
             self.plotRobot(img, self.GoalLinks, colors=["blue", "blue", "blue"])
         self.plotRobot(img, self.links)
 
-        imshow(np.asarray(img))
+        #imshow(np.asarray(img))
         return img
 
 

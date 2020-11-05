@@ -2,8 +2,9 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 
+import math
 import numpy as np
-from EnvRobot import EnvRobot
+from gym_robotmimic.EnvRobot import EnvRobot
 
 class RobotMimicEnv(gym.Env):
     metadata = {'render.modes':['human']}
@@ -18,22 +19,25 @@ class RobotMimicEnv(gym.Env):
                               init_angles) # [initial angles]
         
         self.robot.setObservationSpace(img_w, img_h)
-        self.robot.setGoalRobot(base_position=(0, 50),
-                                init_links=[(10, 10), (50, 7)],
-                                init_angles=[0, 0])
+        
+        self.robot.setGoalRobot(base_position=base_position,
+                                init_links=init_links,
+                                init_angles=init_angles)
                 
         self.action_space = spaces.Discrete(3)
         self.observation_space = spaces.Box(low=np.array([0, 0]), high=np.array([38, 38]), dtype=np.uint)
+        
+        self.viewer = None
         
         self.reset()
     
     def step(self, action):
         if action == 0:
-            s2 = _action_plus(self.robot)
+            s2 = self._action_plus(self.robot)
         elif action == 1:
-            s2 = _action_minus(self.robot)
+            s2 = self._action_minus(self.robot)
         elif action == 2:
-            s2 = _action_stay(self.robot)
+            s2 = self._action_stay(self.robot)
         else:
             raise("Action not implemented")
 
@@ -53,23 +57,39 @@ class RobotMimicEnv(gym.Env):
         self.robot.reset()
     
     def render(self, mode='human', close=False):
-        pass
+        self.robot.plot(goal=True)
+        
+    def render(self, mode='human'):
+        img = np.array(self.robot.plot(goal=True))
+        if mode == 'rgb_array':
+            return img
+        elif mode == 'human':
+            from gym.envs.classic_control import rendering
+            if self.viewer is None:
+                self.viewer = rendering.SimpleImageViewer()
+            self.viewer.imshow(img)
+            return self.viewer.isopen
+
+    def close(self):
+        if self.viewer is not None:
+            self.viewer.close()
+            self.viewer = None
     
     def goal(self, base_position, init_links, init_angles):
         self.robot.setGoalRobot(base_position, init_links, init_angles)
 
 
-    def _action_plus(robot):
+    def _action_plus(self, robot):
         if robot.links[1]['angle'] < 90*math.pi/180:
             robot.turn([0, 5*math.pi/180])
         return int((robot.links[1]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
 
-    def _action_minus(robot):
+    def _action_minus(self, robot):
         if robot.links[1]['angle'] > -90*math.pi/180:
             robot.turn([0, -5*math.pi/180])
         return int((robot.links[1]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
 
-    def _action_stay(robot):
+    def _action_stay(self, robot):
         return int((robot.links[1]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
 
     
