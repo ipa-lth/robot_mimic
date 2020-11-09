@@ -39,7 +39,7 @@ class RobotMimicEnv(gym.Env):
         elif action == 2:
             s2 = self._action_stay(self.robot)
         else:
-            raise("Action not implemented")
+            raise AttributeError("Action not implemented: {}".format(action))
 
         #i0 = int((robot_goal_state[1] + 90*math.pi/180) / (5*math.pi/180)) # goal robot state 1 
         #i1 = int((robot_goal_state[2] + 90*math.pi/180) / (5*math.pi/180)) # goal robot state 2
