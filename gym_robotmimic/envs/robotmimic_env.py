@@ -32,10 +32,13 @@ class RobotMimicEnv(gym.Env):
             dtype=np.uint)
         
         self.viewer = None
+        self.cnt_step = 0
         
         #self.reset()
     
     def step(self, action):
+        self.cnt_step += 1
+        
         if action == 0:
             self._action_plus(self.robot)
         elif action == 1:
@@ -47,7 +50,7 @@ class RobotMimicEnv(gym.Env):
 
         state = self._getState()
         reward = self.robot.getReward()
-        done = False
+        done = self.cnt_step >= 250
         info = {}
         
         return (state, reward, done, info)
@@ -58,6 +61,7 @@ class RobotMimicEnv(gym.Env):
         self.robot.setGoalJoints(val)
 
         self.robot.reset()
+        self.cnt_step = 0
         return self._getState()
     
     def render(self, mode='human', close=False):
