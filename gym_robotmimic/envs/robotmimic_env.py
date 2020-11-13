@@ -37,20 +37,15 @@ class RobotMimicEnv(gym.Env):
     
     def step(self, action):
         if action == 0:
-            s2 = self._action_plus(self.robot)
+            self._action_plus(self.robot)
         elif action == 1:
-            s2 = self._action_minus(self.robot)
+            self._action_minus(self.robot)
         elif action == 2:
-            s2 = self._action_stay(self.robot)
+            self._action_stay(self.robot)
         else:
             raise AttributeError("Action not implemented: {}".format(action))
 
-        #i0 = int((robot_goal_state[1] + 90*math.pi/180) / (5*math.pi/180)) # goal robot state 1 
-        #i1 = int((robot_goal_state[2] + 90*math.pi/180) / (5*math.pi/180)) # goal robot state 2
-        #i2 = int((self.robot.links[1]['angle'] + 90*math.pi/180) / (5*math.pi/180)) # robot state 1 
-        s0 = int((self.robot.GoalAngles[1] + 90*math.pi/180) / (5*math.pi/180))
-        
-        state = [s0, s2]
+        state = self._getState()
         reward = self.robot.getReward()
         done = False
         info = {}
@@ -63,6 +58,7 @@ class RobotMimicEnv(gym.Env):
         self.robot.setGoalJoints(val)
 
         self.robot.reset()
+        return self._getState()
     
     def render(self, mode='human', close=False):
         self.robot.plot(goal=True)
@@ -86,6 +82,15 @@ class RobotMimicEnv(gym.Env):
     def goal(self, base_position, init_links, init_angles):
         self.robot.setGoalRobot(base_position, init_links, init_angles)
 
+    def _getState(self):
+                #i0 = int((robot_goal_state[1] + 90*math.pi/180) / (5*math.pi/180)) # goal robot state 1 
+        #i1 = int((robot_goal_state[2] + 90*math.pi/180) / (5*math.pi/180)) # goal robot state 2
+        #i2 = int((self.robot.links[1]['angle'] + 90*math.pi/180) / (5*math.pi/180)) # robot state 1 
+        #s0 = int((self.robot.GoalAngles[1] + 90*math.pi/180) / (5*math.pi/180))
+        
+        s0 = int((self.robot.GoalAngles[1] + 90*math.pi/180) / (5*math.pi/180))
+        s2 = int((self.robot.angles[1] + 90*math.pi/180) / (5*math.pi/180))
+        return [s0, s2]
 
     def _action_plus(self, robot):
         if robot.links[1]['angle'] < 85*math.pi/180:
