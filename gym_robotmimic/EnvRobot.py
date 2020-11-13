@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw
 from matplotlib.pyplot import imshow
 import numpy as np
 import itertools
+import random
 
 class EnvRobot:
     #############################
@@ -28,6 +29,7 @@ class EnvRobot:
 
         self.links = self.set_joints(links, init_angles)
         self.init_angles = init_angles
+        self.angles = init_angles
 
     def setGoalRobot(self, base_position, init_links, init_angles):
         links = [self.link(init_links[0][0], init_links[0][1], 0, base_position, 0)]
@@ -56,10 +58,12 @@ class EnvRobot:
 
     def reset(self):
         self.links = self.set_joints(self.links, self.init_angles)
+        self.angles = self.init_angles
 
     def turn(self, angles):
         #print(angles)
         self.links = self.add_to_joints(self.links, angles)
+        self.angles = np.add(self.angles, angles).tolist()
 
     def getRobotState(self, links):
         img = Image.new("RGB", (self.img_w, self.img_h))
@@ -101,6 +105,18 @@ class EnvRobot:
         self.maxi = max(rewards)
         return (self.mini, self.maxi)
 
+    def getRandomizeGoalJoints(self, min_angle, max_angle, step=1):
+        random_joints = [random.randrange(min_angle, max_angle, step)*math.pi/180.0 for _ in self.GoalLinks]
+        return random_joints
+    
+    def setGoalJoints(self, joint_values):
+        # Replace all values which are None with the current angles
+        for i, val in enumerate(joint_values):
+            if val is None:
+                joint_values[i] = self.GoalAngles[i]
+        self.GoalLinks = self.set_joints(self.GoalLinks, joint_values)
+        self.GoalAngles = joint_values
+        
     #############################
     # More functional functions #
     #############################

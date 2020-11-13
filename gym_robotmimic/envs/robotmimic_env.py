@@ -25,11 +25,15 @@ class RobotMimicEnv(gym.Env):
                                 init_angles=init_angles)
                 
         self.action_space = spaces.Discrete(3)
-        self.observation_space = spaces.Box(low=np.array([0, 0]), high=np.array([38, 38]), dtype=np.uint)
+        
+        self.observation_space = spaces.Box(
+            low=np.array([0, 0]), 
+            high=np.array([35, 35]),
+            dtype=np.uint)
         
         self.viewer = None
         
-        self.reset()
+        #self.reset()
     
     def step(self, action):
         if action == 0:
@@ -54,6 +58,10 @@ class RobotMimicEnv(gym.Env):
         return (state, reward, done, info)
   
     def reset(self):
+        val = self.robot.getRandomizeGoalJoints(-90, 90, 5)
+        val = [None if i in range(0,1) else x for i, x in enumerate(val)]
+        self.robot.setGoalJoints(val)
+
         self.robot.reset()
     
     def render(self, mode='human', close=False):
@@ -80,12 +88,12 @@ class RobotMimicEnv(gym.Env):
 
 
     def _action_plus(self, robot):
-        if robot.links[1]['angle'] < 90*math.pi/180:
+        if robot.links[1]['angle'] < 85*math.pi/180:
             robot.turn([0, 5*math.pi/180])
         return int((robot.links[1]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
 
     def _action_minus(self, robot):
-        if robot.links[1]['angle'] > -90*math.pi/180:
+        if robot.links[1]['angle'] > -85*math.pi/180:
             robot.turn([0, -5*math.pi/180])
         return int((robot.links[1]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
 
