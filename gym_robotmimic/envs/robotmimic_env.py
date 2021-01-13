@@ -39,18 +39,11 @@ class RobotMimicEnv(gym.Env):
     def step(self, action):
         self.cnt_step += 1
         
-        if action == 0:
-            self._action_minus(self.robot)
-        elif action == 1:
-            self._action_stay(self.robot)
-        elif action == 2:
-            self._action_plus(self.robot)
-        else:
-            raise AttributeError("Action not implemented: {}".format(action))
+        exit = self._applyAction(action)
 
         state = self._getState()
-        reward = self.robot.getReward()
-        done = self.cnt_step >= 2500
+        reward = self._getReward(action)
+        done = self.cnt_step >= 5000 or exit
         info = {}
         
         return (state, reward, done, info)
@@ -86,6 +79,21 @@ class RobotMimicEnv(gym.Env):
     def goal(self, base_position, init_links, init_angles):
         self.robot.setGoalRobot(base_position, init_links, init_angles)
 
+    def _getReward(self, action):
+        return self.robot.getReward()
+        
+    def _applyAction(self, action):
+        if action == 0:
+            self._action_minus(self.robot, 1)
+        elif action == 1:
+            self._action_stay(self.robot, 1)
+        elif action == 2:
+            self._action_plus(self.robot, 1)
+        else:
+            raise AttributeError("Action not implemented: {}".format(action))
+        
+        return False
+        
     def _getState(self):
                 #i0 = int((robot_goal_state[1] + 90*math.pi/180) / (5*math.pi/180)) # goal robot state 1 
         #i1 = int((robot_goal_state[2] + 90*math.pi/180) / (5*math.pi/180)) # goal robot state 2
@@ -96,17 +104,70 @@ class RobotMimicEnv(gym.Env):
         s2 = int((self.robot.angles[1] + 90*math.pi/180) / (5*math.pi/180))
         return [s0, s2]
 
-    def _action_plus(self, robot):
-        if robot.links[1]['angle'] < 85*math.pi/180:
-            robot.turn([0, 5*math.pi/180])
-        return int((robot.links[1]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
+    def _action_plus(self, robot, link):
+        if robot.links[link]['angle'] < 85*math.pi/180:
+            a = [0, 0]
+            a[link] = 5*math.pi/180
+            robot.turn(a)
+        return int((robot.links[link]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
 
-    def _action_minus(self, robot):
-        if robot.links[1]['angle'] > -85*math.pi/180:
-            robot.turn([0, -5*math.pi/180])
-        return int((robot.links[1]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
+    def _action_minus(self, robot, link):
+        if robot.links[link]['angle'] > -85*math.pi/180:
+            a = [0, 0]
+            a[link] = -5*math.pi/180
+            robot.turn(a)
+        return int((robot.links[link]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
 
-    def _action_stay(self, robot):
-        return int((robot.links[1]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
+    def _action_stay(self, robot, link):
+        return int((robot.links[link]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
 
     
+    
+class RobotMimicEnv_1(RobotMimicEnv):
+    def __init__(self, base_position=(75, 75),
+                       init_links=[(20, 10), (40, 5)],
+                       init_angles=[0, 0],
+                       img_w=150, img_h=150):
+        RobotMimicEnv.__init__(self, base_position,
+                       init_links,
+                       init_angles,
+                       img_w, img_h)
+        self.action_space = spaces.Discrete(6)
+        
+    def _applyAction(self, action):
+        if action == 0:
+            self._action_minus(self.robot, 0)
+        elif action == 1:
+            self._action_minus(self.robot, 1)
+        elif action == 2:
+            self._action_stay(self.robot, 0)
+        elif action == 3:
+            self._action_stay(self.robot, 1)
+        elif action == 4:
+            self._action_plus(self.robot, 0)
+        elif action == 5:
+            self._action_plus(self.robot, 1)
+        else:
+            raise AttributeError("Action not implemented: {}".format(action))
+        return False
+
+    def _getReward(self, action):
+        bonus_gain = 1
+        if action == 2 or action == 3:
+            bonus_gain = 1.1
+        return self.robot.getReward() * bonus_gain
+    
+    def _action_plus(self, robot, link):
+        a = [0, 0]
+        a[link] = 5*math.pi/180
+        robot.turn(a)
+        return int((robot.links[link]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
+
+    def _action_minus(self, robot, link):
+        a = [0, 0]
+        a[link] = -5*math.pi/180
+        robot.turn(a)
+        return int((robot.links[link]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
+
+    def _action_stay(self, robot, link):
+        return int((robot.links[link]['angle'] + 90*math.pi/180) / (5*math.pi/180)) 
