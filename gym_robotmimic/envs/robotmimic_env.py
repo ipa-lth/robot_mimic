@@ -40,17 +40,17 @@ class RobotMimicEnv(gym.Env):
         self.cnt_step += 1
         
         if action == 0:
-            self._action_plus(self.robot)
-        elif action == 1:
             self._action_minus(self.robot)
-        elif action == 2:
+        elif action == 1:
             self._action_stay(self.robot)
+        elif action == 2:
+            self._action_plus(self.robot)
         else:
             raise AttributeError("Action not implemented: {}".format(action))
 
         state = self._getState()
         reward = self.robot.getReward()
-        done = self.cnt_step >= 250
+        done = self.cnt_step >= 2500
         info = {}
         
         return (state, reward, done, info)
