@@ -134,6 +134,11 @@ class RobotMimicEnv_1(RobotMimicEnv):
                        img_w, img_h)
         self.action_space = spaces.Discrete(6)
         
+        self.observation_space = spaces.Box(
+            low=np.array([0, 0]), 
+            high=np.array([355, 355]),
+            dtype=np.uint)
+        
     def reset(self):
         val = self.robot.getRandomizeGoalJoints(0, 360, 5)
         #val = [None if i in range(0,1) else x for i, x in enumerate(val)]
@@ -143,6 +148,9 @@ class RobotMimicEnv_1(RobotMimicEnv):
         self.cnt_step = 0
         return self._getState()
     
+    def _getState(self):
+        return [x%360 for x in RobotMimicEnv._getState(self)]
+        
     def _applyAction(self, action):
         if action == 0:
             self._action_minus(self.robot, 0)
