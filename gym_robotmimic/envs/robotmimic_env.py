@@ -43,7 +43,7 @@ class RobotMimicEnv(gym.Env):
 
         state = self._getState()
         reward = self._getReward(action)
-        done = self.cnt_step >= 5000 or exit
+        done = self.cnt_step >= 2000 or exit
         info = {}
         
         return (state, reward, done, info)
@@ -134,6 +134,15 @@ class RobotMimicEnv_1(RobotMimicEnv):
                        img_w, img_h)
         self.action_space = spaces.Discrete(6)
         
+    def reset(self):
+        val = self.robot.getRandomizeGoalJoints(0, 360, 5)
+        #val = [None if i in range(0,1) else x for i, x in enumerate(val)]
+        self.robot.setGoalJoints(val)
+
+        self.robot.reset()
+        self.cnt_step = 0
+        return self._getState()
+    
     def _applyAction(self, action):
         if action == 0:
             self._action_minus(self.robot, 0)
